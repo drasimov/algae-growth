@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Image Processor</title>
+	<style>
+		#a, #b{
+			width: 50px;
+		}
+		#pre{
+			text-align: right;
+		}
+	</style>
+</head>
+<body>
+	<p>File source: <input id = "pre" type = "text" size = "8" value = "images" onInput = "updatePreview()">/n.<input id = "suf" type = "text" size = "4" value = "jpg" onInput = "updatePreview()"></p>
+	<p>n from <input id = "a" type = "number" onInput = "updatePreview()" value = "1"> to <input id = "b" type = "number" onInput = "updatePreview()" value = "14"></p>
+	<button onClick = "download_csv_file()">Download CSV</button><br>
+	<div id = "preview"></div>
+
+	<script src="color-thief.umd.js"></script>
+	<script>
+		updatePreview();
+		function $(x){
+			return document.getElementById(x);
+		}
+
+		var csvFileData = [];  
+
+		const colorThief = new ColorThief();
+
+		function updatePreview(){
+			$("preview").innerHTML = "";
+			for(let i = $('a').value; i<=$('b').value; i++){
+				update(i);
+				if(i%5==0){
+					$("preview").innerHTML += "<br>";
+				}
+			}
+		}
+		function update(i){
+			let toAnalyze = new Image(100,100);
+			$("preview").appendChild(toAnalyze);
+			toAnalyze.crossorigin = "anonymous";
+			toAnalyze.src = $("pre").value + "/" + i + "." + $("suf").value;
+
+			toAnalyze.addEventListener('load', function() {
+				var color = colorThief.getColor(toAnalyze);
+				console.log("rgba(" + color[0] + "," + color[1]+ "," + color[2] + ",1)");
+				csvFileData.push(new Array(i, color[0], color[1], color[2]));
+			});
+		}
+
+		//create a user-defined function to download CSV file   
+		function download_csv_file() {  
+			
+			//define the heading for each row of the data  
+			var csv = 'Day, R, G, B \n';  
+				
+			//merge the data with CSV  
+			csvFileData.forEach(function(row) {  
+				csv += row.join(',');  
+				csv += "\n";  
+			});  
+			
+			//display the created CSV data on the web browser   		
+			var file = document.createElement('a');  
+			file.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);  
+			file.target = '_blank';  
+			file.download = 'RGB.csv';  
+			file.click();  
+		}
+	</script>
+
+</body>
+</html>
+
